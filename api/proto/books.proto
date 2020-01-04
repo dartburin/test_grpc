@@ -1,7 +1,7 @@
 syntax = "proto3";
 package books;
 
-import "google/api/annotations.proto";
+import "test_grpc/third_party/api/annotations.proto";
 
 // The library service definition.
 service Library {
