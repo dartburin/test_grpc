@@ -1,0 +1,61 @@
+version: '3'
+services:
+  servdb:
+    restart: always
+    image: postgres:latest
+    container_name: pgserver
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db1
+    volumes:
+      - /tmp/data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    networks:
+      - dockernet
+          
+  proxy:
+    restart: always
+    container_name: RESTproxy
+    build:
+      context: .
+      dockerfile: Dockerfile-proxy
+      args:
+        - A_GRPC_HOST=serv
+        - A_GRPC_PORT=8086
+        - A_HTTP_PORT=8080
+              
+    ports:
+      - "127.0.0.1:8080:8080"  
+      - "8086"  
+    networks:
+      - dockernet
+      
+  serv:
+    restart: always
+    container_name: gRPCserver
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - A_DB_USER=postgres
+        - A_DB_PASS=postgres
+        - A_DB_BASE=books
+        - A_DB_HOST=servdb
+        - A_DB_PORT=5432
+        - A_GRPC_PORT=8086
+
+    ports:
+      - "5432"
+      - "127.0.0.1:8086:8086"  
+    networks:
+      - dockernet
+
+networks:
+  dockernet:
+    driver: bridge
+          
+
+
+

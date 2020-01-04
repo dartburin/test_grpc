@@ -1,0 +1,50 @@
+FROM golang:latest
+
+ARG A_GRPC_HOST=0.0.0.0
+ARG A_GRPC_PORT=1111
+ARG A_HTTP_PORT=8080
+
+ENV APP_NAME proxy
+
+ENV GRPC_HOST=${A_GRPC_HOST} 
+ENV GRPC_PORT=${A_GRPC_PORT} 
+ENV HTTP_PORT=${A_HTTP_PORT} 
+
+#RUN go version
+
+RUN mkdir -p ${GOPATH}/src/${APP_NAME}
+WORKDIR /go/src/${APP_NAME}
+
+COPY go.mod ./
+COPY go.sum ./
+
+COPY ./cmd ./
+COPY ./cmd/proxy/ ./cmd/
+COPY ./cmd/proxy/* ./cmd/proxy/
+
+COPY ./api ./
+COPY ./api/proto/ ./api/
+COPY ./api/proto/* ./api/proto/
+
+COPY ./third_party ./
+
+COPY ./internal/ ./
+COPY ./internal/api ./internal/
+COPY ./internal/api/proxy ./internal/api/
+COPY ./internal/api/proxy/* ./internal/api/proxy/
+
+#RUN ls -l
+#RUN pwd
+
+RUN go mod download 
+#RUN protoc -I/usr/local/include -I. -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --go_out=plugins=grpc:. cmd/grpc/books/books.proto
+#RUN protoc -I/usr/local/include -I. -I$GOPATH/src -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis --grpc-gateway_out=logtostderr=true:. cmd/grpc/books/books.proto
+RUN go build cmd/proxy/main.go
+RUN ls -l
+
+EXPOSE ${HTTP_PORT}
+EXPOSE ${GRPC_PORT}
+
+
+CMD ./main -grpchost=${GRPC_HOST} -grpcport=${GRPC_PORT} -httpport=${HTTP_PORT}
+
