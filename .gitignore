@@ -1,7 +1,5 @@
 # code file
 main
-go.mod
-go.sum
 Makefile
 
 *.txt
