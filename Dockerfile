@@ -19,7 +19,7 @@ ENV GRPC_PORT=${A_GRPC_PORT}
 #RUN go version
 
 RUN mkdir -p ${GOPATH}/src/${APP_NAME}
-WORKDIR /go/src/${APP_NAME}
+WORKDIR ${GOPATH}/src/${APP_NAME}
 
 COPY go.mod ./
 COPY go.sum ./

@@ -4,8 +4,8 @@ Test project with gRPC and REST proxy.
 
 Protobuf for gRPC compilation
 -----------------------------
-protoc -I. -I$GOPATH/src --go_out=plugins=grpc:. api/proto/books.proto
-protoc -I. -I$GOPATH/src --grpc-gateway_out=logtostderr=true:. api/proto/books.proto
+protoc -I. -I$GOPATH/src/github.com/dartburin --go_out=plugins=grpc:. api/proto/books.proto
+protoc -I. -I$GOPATH/src/github.com/dartburin --grpc-gateway_out=logtostderr=true:. api/proto/books.proto
 
 Start
 -------
