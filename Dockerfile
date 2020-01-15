@@ -25,11 +25,11 @@ COPY go.mod ./
 COPY go.sum ./
 
 COPY ./cmd ./
-COPY ./cmd/server/ ./cmd/
+COPY ./cmd/server ./cmd/
 COPY ./cmd/server/* ./cmd/server/
 
 COPY ./api ./
-COPY ./api/proto/ ./api/
+COPY ./api/proto ./api/
 COPY ./api/proto/* ./api/proto/
 
 #COPY ./third_party ./
@@ -38,8 +38,10 @@ COPY ./internal/ ./
 COPY ./internal/api ./internal/
 COPY ./internal/api/server ./internal/api/
 COPY ./internal/api/server/* ./internal/api/server/
-COPY ./internal/db ./internal/
-COPY ./internal/db/* ./internal/db/
+COPY ./internal/books ./internal/
+COPY ./internal/books/* ./internal/books/
+COPY ./internal/logger ./internal/
+COPY ./internal/logger/* ./internal/logger/
 
 #RUN ls -l
 #RUN pwd

@@ -15,12 +15,12 @@ services:
     networks:
       - dockernet
           
-  proxy:
+  gateway:
     restart: always
-    container_name: RESTproxy
+    container_name: RESTgateway
     build:
       context: .
-      dockerfile: Dockerfile-proxy
+      dockerfile: Dockerfile-gateway
       args:
         - A_GRPC_HOST=serv
         - A_GRPC_PORT=8086

@@ -6,9 +6,9 @@ ARG A_HTTP_PORT=8080
 
 ENV APP_NAME proxy
 
-ENV GRPC_HOST=${A_GRPC_HOST} 
-ENV GRPC_PORT=${A_GRPC_PORT} 
-ENV HTTP_PORT=${A_HTTP_PORT} 
+ENV GRPC_HOST=${A_GRPC_HOST}
+ENV GRPC_PORT=${A_GRPC_PORT}
+ENV HTTP_PORT=${A_HTTP_PORT}
 
 #RUN go version
 
@@ -19,26 +19,28 @@ COPY go.mod ./
 COPY go.sum ./
 
 COPY ./cmd ./
-COPY ./cmd/proxy/ ./cmd/
-COPY ./cmd/proxy/* ./cmd/proxy/
+COPY ./cmd/gateway/ ./cmd/
+COPY ./cmd/gateway/* ./cmd/gateway/
 
 COPY ./api ./
-COPY ./api/proto/ ./api/
+COPY ./api/proto ./api/
 COPY ./api/proto/* ./api/proto/
 
 #COPY ./third_party ./
 
 COPY ./internal/ ./
 COPY ./internal/api ./internal/
-COPY ./internal/api/proxy ./internal/api/
-COPY ./internal/api/proxy/* ./internal/api/proxy/
+COPY ./internal/api/gateway ./internal/api/
+COPY ./internal/api/gateway/* ./internal/api/gateway/
+COPY ./internal/logger ./internal/
+COPY ./internal/logger/* ./internal/logger/
 
 #RUN ls -l
 #RUN pwd
 
-RUN go mod download 
+RUN go mod download
 #RUN protoc -I. -I$GOPATH/src --grpc-gateway_out=logtostderr=true:. api/proto/books.proto
-RUN go build cmd/proxy/main.go
+RUN go build cmd/gateway/main.go
 RUN ls -l
 
 EXPOSE ${HTTP_PORT}

@@ -8,8 +8,9 @@ import (
 	"net"
 	"strconv"
 
+	lg "github.com/sirupsen/logrus"
 	bk "test_grpc/api/proto"
-	pdb "test_grpc/internal/db"
+	pdb "test_grpc/internal/books"
 
 	"google.golang.org/grpc"
 )
@@ -17,21 +18,24 @@ import (
 // Data for handlers
 type supportGRPC struct {
 	base  *sql.DB
+	log   lg.FieldLogger
 	GPort string
 	GConn string
 }
 
 // New creates new server struct
-func New(b *sql.DB, gport string) *supportGRPC {
+func New(b *sql.DB, gport string, log lg.FieldLogger) *supportGRPC {
 	gstr := fmt.Sprintf(":%s", gport)
 	return &supportGRPC{
 		base:  b,
+		log:   log,
 		GPort: gport,
 		GConn: gstr,
 	}
 }
 
 func (s *supportGRPC) Start() error {
+	s.log.Println("Server gRPC init.")
 	lis, err := net.Listen("tcp", s.GConn)
 	if err != nil {
 		return err
@@ -39,6 +43,7 @@ func (s *supportGRPC) Start() error {
 	srv := grpc.NewServer()
 	bk.RegisterLibraryServer(srv, s)
 
+	s.log.Println("Server gRPC start.")
 	err = srv.Serve(lis)
 	if err != nil {
 		return err
@@ -73,7 +78,7 @@ func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*
 	b.Author = imsg.Message.Author
 	b.Title = imsg.Message.Title
 
-	//fmt.Printf("Add %v\n", b)
+	s.log.Printf("gRPC post a book %v.", b)
 
 	id, err := b.InsertBook(s.base)
 	if err != nil {
@@ -91,7 +96,7 @@ func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*
 	bb.Id = id
 	bb.Author = b.Author
 	bb.Title = b.Title
-	//fmt.Printf("Add ret %v\n", bb)
+	s.log.Printf("gRPC post a book ret %v.", bb)
 
 	return &bb, nil
 }
@@ -112,6 +117,8 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 
 	bb := bk.Result{}
 	bb.Rez = fmt.Sprintf("Delete book with id = %v", b.Id)
+
+	s.log.Printf("gRPC delete a book %v.", bb)
 	return &bb, nil
 }
 
@@ -140,6 +147,7 @@ func (s *supportGRPC) UpdateBook(ctx context.Context, imsg *bk.UpdateBookRequest
 	bb.Author = b.Author
 	bb.Title = b.Title
 
+	s.log.Printf("gRPC updata a book %v.", bb)
 	return &bb, nil
 }
 
@@ -164,5 +172,6 @@ func (s *supportGRPC) PathBook(ctx context.Context, imsg *bk.UpdateBookRequest) 
 	bb.Author = b.Author
 	bb.Title = b.Title
 
+	s.log.Printf("gRPC path a book %v.", bb)
 	return &bb, nil
 }

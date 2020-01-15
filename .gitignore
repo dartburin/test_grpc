@@ -3,6 +3,7 @@ main
 Makefile
 
 *.txt
+*.log
 
 .vscode/*
 data/*

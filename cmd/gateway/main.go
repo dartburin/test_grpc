@@ -4,7 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	pr "test_grpc/internal/api/proxy"
+	pr "test_grpc/internal/api/gateway"
+	lg "test_grpc/internal/logger"
 )
 
 func main() {
@@ -14,28 +15,27 @@ func main() {
 	grpcHostName := flag.String("grpchost", "", "grpc host name")
 	grpcPort := flag.String("grpcport", "", "port for grpc connect")
 
+	logLevel := flag.String("loglvl", "", "logging message level")
+	logFile := flag.String("logfile", "", "logging message to file")
 	flag.Parse()
 
-	for _, a := range os.Args {
-		fmt.Printf("%s ", a)
-	}
-	fmt.Println("")
+	//Init log system
+	log := lg.LogInit(*logLevel, *logFile)
+	log.Println("Server log system init.")
+	lg.PrintOsArgs(log)
 
 	// Check existing obligatory http and db parameters
 	if *grpcHostName == "" || *httpPort == "" || *grpcPort == "" {
-		fmt.Println("Init proxy error: set not all obligatory parameters.")
 		flag.PrintDefaults()
 		fmt.Println("")
+		log.Fatalln("Init server error: set not all obligatory parameters.")
 		os.Exit(1)
 	}
 
 	//Start gRPC + HTTP server
-	g := pr.New(*grpcHostName, *grpcPort, *httpPort)
-	fmt.Printf("HTTP proxy start\n")
-
+	g := pr.New(*grpcHostName, *grpcPort, *httpPort, log)
 	err := g.Start()
-
 	if err != nil {
-		fmt.Printf("HTTP proxy error: %s\n", err.Error())
+		log.Fatalf("HTTP gateway error: %s.", err.Error())
 	}
 }

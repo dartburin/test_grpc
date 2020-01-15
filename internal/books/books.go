@@ -1,4 +1,4 @@
-package postgredb
+package books
 
 import (
 	"database/sql"
@@ -6,12 +6,14 @@ import (
 	"fmt"
 
 	_ "github.com/lib/pq"
+	lg "github.com/sirupsen/logrus"
 )
 
 // DataBase info
 type ParamDB struct {
 	Conf Config
 	Base *sql.DB
+	log  lg.FieldLogger
 }
 
 // Data for configuration of DB connecttion
@@ -31,11 +33,12 @@ type Book struct {
 }
 
 // Create connection to db
-func ConnectToDB(conf Config) (ParamDB, error) {
+func ConnectToDB(conf Config, log lg.FieldLogger) (ParamDB, error) {
 	var err error = nil
 	var par ParamDB
 	par.Conf = conf
 	par.Base = nil
+	par.log = log
 
 	if conf.User == "" || conf.Pass == "" || conf.Db == "" ||
 		conf.Host == "" || conf.Port == "" {
@@ -58,7 +61,6 @@ func ConnectToDB(conf Config) (ParamDB, error) {
 		par, err = createDB(conf, defdb)
 
 		if err != nil {
-			fmt.Printf("Error: %v !\n", err.Error())
 			defer par.Base.Close()
 			par.Base = nil
 			return par, err
@@ -66,7 +68,6 @@ func ConnectToDB(conf Config) (ParamDB, error) {
 
 		err = createBookTable(par.Base)
 		if err != nil {
-			fmt.Printf("Error: %v !\n", err.Error())
 			defer par.Base.Close()
 			par.Base = nil
 			return par, err
@@ -83,6 +84,7 @@ func ConnectToDB(conf Config) (ParamDB, error) {
 		par.Base = db
 	}
 
+	par.log.Println("Set connection to database.")
 	return par, nil
 }
 
@@ -91,7 +93,7 @@ func (par *ParamDB) Close() (err error) {
 	if par.Base == nil {
 		return nil
 	}
-	fmt.Printf("Close ! %v \n\n", par)
+	par.log.Printf("Close database: %v.", par)
 
 	if err = par.Base.Close(); err != nil {
 		return err

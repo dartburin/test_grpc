@@ -1,5 +1,5 @@
 # test_grpc
-Test project with gRPC and REST proxy.
+Test project with gRPC and REST HTTP gateway.
 
 
 Protobuf for gRPC compilation
