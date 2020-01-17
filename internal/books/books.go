@@ -11,9 +11,8 @@ import (
 
 // DataBase info
 type ParamDB struct {
-	Conf Config
 	Base *sql.DB
-	log  lg.FieldLogger
+	Log  lg.FieldLogger
 }
 
 // Data for configuration of DB connecttion
@@ -33,19 +32,18 @@ type Book struct {
 }
 
 // Create connection to db
-func ConnectToDB(conf Config, log lg.FieldLogger) (ParamDB, error) {
+func ConnectToDB(conf Config, log lg.FieldLogger) (*ParamDB, error) {
 	var err error
 	var par ParamDB
-	par.Conf = conf
 	par.Base = nil
-	par.log = log
+	par.Log = log
 
-	par.log.Println("Start connection to database.")
+	par.Log.Println("Start connection to database.")
 
 	if conf.User == "" || conf.Pass == "" || conf.Db == "" ||
 		conf.Host == "" || conf.Port == "" {
 		err = errors.New("Bad connection parameters")
-		return par, err
+		return &par, err
 	}
 
 	// Connect to user database
@@ -54,12 +52,12 @@ func ConnectToDB(conf Config, log lg.FieldLogger) (ParamDB, error) {
 	db, err := openDB(connstr)
 	if err != nil {
 		err = errors.New("Bad connection to user db")
-		return par, err
+		return &par, err
 	}
 	par.Base = db
 
-	par.log.Println("Set connection to database.")
-	return par, nil
+	par.Log.Println("Set connection to database.")
+	return &par, nil
 }
 
 // Close user database
@@ -67,7 +65,7 @@ func (par *ParamDB) Close() (err error) {
 	if par.Base == nil {
 		return nil
 	}
-	par.log.Printf("Close database: %v.", par)
+	par.Log.Printf("Close database: %v.", par)
 
 	if err = par.Base.Close(); err != nil {
 		return err
@@ -77,7 +75,7 @@ func (par *ParamDB) Close() (err error) {
 	return nil
 }
 
-// Check connect to DB
+// Check connect to database
 func openDB(confstr string) (*sql.DB, error) {
 	db, err := sql.Open("postgres", confstr)
 
@@ -95,46 +93,91 @@ func openDB(confstr string) (*sql.DB, error) {
 	return db, nil
 }
 
-// Insert book info into database
-func (b *Book) InsertBook(base *sql.DB) (int64, error) {
-	if base == nil {
-		return 0, errors.New("DB not opened")
+// Start transaction in database
+func (par *ParamDB) StartTX(event string) (*sql.Tx, error) {
+	if par.Base == nil {
+		par.Log.Errorf("DB not opened (%s).", event)
+		return nil, errors.New("DB not opened")
 	}
 
-	query := fmt.Sprintf("INSERT INTO BookInfo (title, author) VALUES('%s', '%s') RETURNING id;", b.Title, b.Author)
-	row := base.QueryRow(query)
-
-	var id int64
-	if err := row.Scan(&id); err != nil {
-		return 0, errors.New("Error insert book - bad id")
+	tx, err := par.Base.Begin()
+	if err != nil {
+		par.Log.Errorf("Error start transaction (%s) (%s).", event, err.Error())
+		return nil, err
 	}
-	return id, nil
+
+	par.Log.Printf("Start transaction (%s).", event)
+	return tx, nil
+}
+
+// Stop transaction in database
+func (par *ParamDB) StopTX(tx *sql.Tx, result *bool, event string) {
+	if *result {
+		par.Log.Printf("Commit transaction (%s).", event)
+		if err := tx.Commit(); err != nil {
+			par.Log.Errorf("Error commit transaction (%s) (%s).", event, err.Error())
+		}
+	} else {
+		par.Log.Printf("Rollback transaction (%s).", event)
+		if err := tx.Rollback(); err != nil {
+			par.Log.Errorf("Error rollback transaction (%s) (%s).", event, err.Error())
+		}
+	}
 }
 
 // Insert book info into database
-func (b *Book) DeleteBook(base *sql.DB) error {
-	if base == nil {
-		return errors.New("DB not opened")
+func (b *Book) InsertBook(par *ParamDB) (int64, error) {
+	tx, err := par.StartTX("Insert Book")
+	if err != nil {
+		return 0, err
 	}
+	txEnd := false
+	defer par.StopTX(tx, &txEnd, "Insert Book")
+
+	query := fmt.Sprintf("INSERT INTO BookInfo (title, author) VALUES('%s', '%s') RETURNING id;", b.Title, b.Author)
+	row := tx.QueryRow(query)
+
+	var id int64
+	if err := row.Scan(&id); err != nil {
+		return 0, errors.New("Error insert book: - bad id")
+	}
+
+	txEnd = true
+	return id, nil
+}
+
+// Delete book info from database
+func (b *Book) DeleteBook(par *ParamDB) error {
+	tx, err := par.StartTX("Delete Book")
+	if err != nil {
+		return err
+	}
+	txEnd := false
+	defer par.StopTX(tx, &txEnd, "Delete Book")
 
 	if b.Id <= 0 {
 		return errors.New("Id not set")
 	}
 
 	query := fmt.Sprintf("DELETE FROM BookInfo where id = %v;", b.Id)
-	_, err := base.Exec(query)
+	_, err = tx.Exec(query)
 
 	if err != nil {
 		return errors.New("Error delete book")
 	}
+
+	txEnd = true
 	return nil
 }
 
 // Update book info into database
-func (b *Book) UpdateBook(base *sql.DB) error {
-	if base == nil {
-		return errors.New("DB not opened")
+func (b *Book) UpdateBook(par *ParamDB) error {
+	tx, err := par.StartTX("Update Book")
+	if err != nil {
+		return err
 	}
+	txEnd := false
+	defer par.StopTX(tx, &txEnd, "Update Book")
 
 	if b.Id <= 0 {
 		return errors.New("Id not set")
@@ -152,20 +195,25 @@ func (b *Book) UpdateBook(base *sql.DB) error {
 		return nil
 	}
 	fmt.Println(query)
-	_, err := base.Exec(query)
+	_, err = tx.Exec(query)
 
 	if err != nil {
 		return errors.New("Error update book")
 	}
+
+	txEnd = true
 	return nil
 }
 
 // Select book info from database
-func (b *Book) SelectBook(base *sql.DB) (*[]Book, error) {
+func (b *Book) SelectBook(par *ParamDB) (*[]Book, error) {
 	bb := make([]Book, 0)
-	if base == nil {
-		return &bb, errors.New("DB not opened")
+	tx, err := par.StartTX("Select Book")
+	if err != nil {
+		return &bb, err
 	}
+	txEnd := false
+	defer par.StopTX(tx, &txEnd, "Select Book")
 
 	var query string
 	if b.Id > 0 {
@@ -174,7 +222,7 @@ func (b *Book) SelectBook(base *sql.DB) (*[]Book, error) {
 		query = fmt.Sprintf("SELECT id, title, author FROM BookInfo ORDER BY id;")
 	}
 
-	rows, err := base.Query(query)
+	rows, err := tx.Query(query)
 	if err != nil {
 		return &bb, errors.New("Select error")
 	}
@@ -189,7 +237,9 @@ func (b *Book) SelectBook(base *sql.DB) (*[]Book, error) {
 	}
 
 	if err != nil {
-		return &bb, errors.New("Error update book")
+		return &bb, errors.New("Error select book")
 	}
+
+	txEnd = true
 	return &bb, nil
 }

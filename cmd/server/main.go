@@ -53,7 +53,7 @@ func main() {
 	defer parDB.Base.Close()
 
 	//Start gRPC server
-	g := gp.New(parDB.Base, *grpcPort, log)
+	g := gp.New(parDB, *grpcPort)
 	err = g.Start()
 	if err != nil {
 		log.Fatalf("Server gRPC error: %s.", err.Error())

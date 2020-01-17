@@ -2,13 +2,11 @@ package server
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"net"
 	"strconv"
 
-	lg "github.com/sirupsen/logrus"
 	bk "test_grpc/api/proto"
 	pdb "test_grpc/internal/books"
 
@@ -17,25 +15,23 @@ import (
 
 // Data for handlers
 type supportGRPC struct {
-	base  *sql.DB
-	log   lg.FieldLogger
+	db    *pdb.ParamDB
 	GPort string
 	GConn string
 }
 
 // New creates new server struct
-func New(b *sql.DB, gport string, log lg.FieldLogger) *supportGRPC {
+func New(db *pdb.ParamDB, gport string) *supportGRPC {
 	gstr := fmt.Sprintf(":%s", gport)
 	return &supportGRPC{
-		base:  b,
-		log:   log,
+		db:    db,
 		GPort: gport,
 		GConn: gstr,
 	}
 }
 
 func (s *supportGRPC) Start() error {
-	s.log.Println("Server gRPC init.")
+	s.db.Log.Println("Server gRPC init.")
 	lis, err := net.Listen("tcp", s.GConn)
 	if err != nil {
 		return err
@@ -43,7 +39,7 @@ func (s *supportGRPC) Start() error {
 	srv := grpc.NewServer()
 	bk.RegisterLibraryServer(srv, s)
 
-	s.log.Println("Server gRPC start.")
+	s.db.Log.Println("Server gRPC start.")
 	err = srv.Serve(lis)
 	if err != nil {
 		return err
@@ -69,7 +65,7 @@ func toDB(id int64, bb *bk.BookData) *pdb.Book {
 
 func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*bk.Books, error) {
 	var bb pdb.Book
-	books, err := bb.SelectBook(s.base)
+	books, err := bb.SelectBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error get book")
 	}
@@ -88,20 +84,20 @@ func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*b
 func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*bk.OneBook, error) {
 	b := toDB(0, imsg.Msg)
 
-	id, err := b.InsertBook(s.base)
+	id, err := b.InsertBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error post (insert) book")
 	}
 
 	b.Id = id
 	// Maybe select not need
-	_, err = b.SelectBook(s.base)
+	_, err = b.SelectBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error post (select) book")
 	}
 
 	bb := toTransport(b)
-	s.log.Printf("gRPC post a book ret %v.", *bb)
+	s.db.Log.Printf("gRPC post a book ret %v.", *bb)
 
 	return bb, nil
 }
@@ -115,7 +111,7 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 	b := &pdb.Book{}
 	b.Id = int64(id)
 
-	err = b.DeleteBook(s.base)
+	err = b.DeleteBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error delete book")
 	}
@@ -123,7 +119,7 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 	bb := bk.Result{}
 	bb.Rez = fmt.Sprintf("Delete book with id = %v", b.Id)
 
-	s.log.Printf("gRPC delete a book %v.", bb)
+	s.db.Log.Printf("gRPC delete a book %v.", bb)
 	return &bb, nil
 }
 
@@ -139,13 +135,13 @@ func (s *supportGRPC) UpdateBook(ctx context.Context, imsg *bk.UpdateBookRequest
 		return nil, errors.New("Error some parameters not set for PUT request")
 	}
 
-	err = b.UpdateBook(s.base)
+	err = b.UpdateBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error update book")
 	}
 
 	bb := toTransport(b)
-	s.log.Printf("gRPC updata a book %v.", *bb)
+	s.db.Log.Printf("gRPC updata a book %v.", *bb)
 	return bb, nil
 }
 
@@ -157,12 +153,12 @@ func (s *supportGRPC) PatchBook(ctx context.Context, imsg *bk.UpdateBookRequest)
 	}
 
 	b := toDB(int64(id), imsg.Msg)
-	err = b.UpdateBook(s.base)
+	err = b.UpdateBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error patch book")
 	}
 
 	bb := toTransport(b)
-	s.log.Printf("gRPC path a book %v.", *bb)
+	s.db.Log.Printf("gRPC path a book %v.", *bb)
 	return bb, nil
 }
