@@ -51,6 +51,22 @@ func (s *supportGRPC) Start() error {
 	return nil
 }
 
+func toTransport(b *pdb.Book) *bk.OneBook {
+	return &bk.OneBook{
+		Id:     b.Id,
+		Author: b.Author,
+		Title:  b.Title,
+	}
+}
+
+func toDB(id int64, bb *bk.BookData) *pdb.Book {
+	return &pdb.Book{
+		Id:     id,
+		Author: bb.Author,
+		Title:  bb.Title,
+	}
+}
+
 func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*bk.Books, error) {
 	var bb pdb.Book
 	books, err := bb.SelectBook(s.base)
@@ -61,11 +77,8 @@ func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*b
 	bs := bk.Books{}
 	bs.Books = make([]*bk.OneBook, 0, 50)
 	for i := range *books {
-		b := bk.OneBook{}
-		b.Id = (*books)[i].Id
-		b.Author = (*books)[i].Author
-		b.Title = (*books)[i].Title
-		bs.Books = append(bs.Books, &b)
+		b := toTransport(&(*books)[i])
+		bs.Books = append(bs.Books, b)
 	}
 
 	return &bs, nil
@@ -73,12 +86,7 @@ func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*b
 
 // Handler for post request
 func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*bk.OneBook, error) {
-
-	b := &pdb.Book{}
-	b.Author = imsg.Message.Author
-	b.Title = imsg.Message.Title
-
-	s.log.Printf("gRPC post a book %v.", b)
+	b := toDB(0, imsg.Msg)
 
 	id, err := b.InsertBook(s.base)
 	if err != nil {
@@ -92,13 +100,10 @@ func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*
 		return nil, errors.New("Error post (select) book")
 	}
 
-	bb := bk.OneBook{}
-	bb.Id = id
-	bb.Author = b.Author
-	bb.Title = b.Title
-	s.log.Printf("gRPC post a book ret %v.", bb)
+	bb := toTransport(b)
+	s.log.Printf("gRPC post a book ret %v.", *bb)
 
-	return &bb, nil
+	return bb, nil
 }
 
 // Handler for delete request
@@ -126,13 +131,10 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 func (s *supportGRPC) UpdateBook(ctx context.Context, imsg *bk.UpdateBookRequest) (*bk.OneBook, error) {
 	id, err := strconv.Atoi(imsg.BookId)
 	if err != nil {
-		return nil, errors.New("Error delete book (bad id)")
+		return nil, errors.New("Error update book (bad id)")
 	}
-	b := &pdb.Book{}
-	b.Id = int64(id)
-	b.Author = imsg.Message.Author
-	b.Title = imsg.Message.Title
 
+	b := toDB(int64(id), imsg.Msg)
 	if b.Author == "" || b.Title == "" {
 		return nil, errors.New("Error some parameters not set for PUT request")
 	}
@@ -142,36 +144,25 @@ func (s *supportGRPC) UpdateBook(ctx context.Context, imsg *bk.UpdateBookRequest
 		return nil, errors.New("Error update book")
 	}
 
-	bb := bk.OneBook{}
-	bb.Id = b.Id
-	bb.Author = b.Author
-	bb.Title = b.Title
-
-	s.log.Printf("gRPC updata a book %v.", bb)
-	return &bb, nil
+	bb := toTransport(b)
+	s.log.Printf("gRPC updata a book %v.", *bb)
+	return bb, nil
 }
 
 // Handler for patch request
-func (s *supportGRPC) PathBook(ctx context.Context, imsg *bk.UpdateBookRequest) (*bk.OneBook, error) {
+func (s *supportGRPC) PatchBook(ctx context.Context, imsg *bk.UpdateBookRequest) (*bk.OneBook, error) {
 	id, err := strconv.Atoi(imsg.BookId)
 	if err != nil {
-		return nil, errors.New("Error delete book (bad id)")
+		return nil, errors.New("Error patch book (bad id)")
 	}
-	b := &pdb.Book{}
-	b.Id = int64(id)
-	b.Author = imsg.Message.Author
-	b.Title = imsg.Message.Title
 
+	b := toDB(int64(id), imsg.Msg)
 	err = b.UpdateBook(s.base)
 	if err != nil {
-		return nil, errors.New("Error update book")
+		return nil, errors.New("Error patch book")
 	}
 
-	bb := bk.OneBook{}
-	bb.Id = b.Id
-	bb.Author = b.Author
-	bb.Title = b.Title
-
-	s.log.Printf("gRPC path a book %v.", bb)
-	return &bb, nil
+	bb := toTransport(b)
+	s.log.Printf("gRPC path a book %v.", *bb)
+	return bb, nil
 }

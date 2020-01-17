@@ -1,0 +1,5 @@
+FROM postgres:latest
+
+COPY ./init/init.sql /docker-entrypoint-initdb.d/
+#RUN chmod -R 777 /docker-entrypoint-initdb.d
+

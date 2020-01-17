@@ -13,65 +13,65 @@ service Library {
 
     rpc UpdateBook(UpdateBookRequest) returns (OneBook) {
         option (google.api.http) = {
-          put: "/books/{BookId}"
-          body: "Message"
+          put: "/books/{book_id}"
+          body: "msg"
         };
     }
 
-    rpc PathBook(UpdateBookRequest) returns (OneBook) {
+    rpc PatchBook(UpdateBookRequest) returns (OneBook) {
         option (google.api.http) = {
-          patch: "/books/{BookId}"
-          body: "Message"
+          patch: "/books/{book_id}"
+          body: "msg"
         };
     }
 
     rpc DeleteBook(DeleteBookRequest) returns (Result) {
         option (google.api.http) = {
-          delete: "/books/{BookId}"
+          delete: "/books/{book_id}"
         };
     }
 
     rpc PostBook(PostBookRequest) returns (OneBook) {
         option (google.api.http) = {
           post: "/books"
-          body: "Message"
+          body: "msg"
         };
     }
 }
   
 
 message Result {
-	string Rez = 1;  
+	string rez = 1;  
 }
 
 message OneBook {
-	int64 Id = 1;    
-	string Author = 2; 
-	string Title = 3;  
+	int64 id = 1;    
+	string author = 2; 
+	string title = 3;  
 }
 
 message Books {
-    repeated OneBook Books = 1;
+    repeated OneBook books = 1;
 }
 
 message BookData {
-	string Author = 1; 
-	string Title = 2;  
+	string author = 1; 
+	string title = 2;  
 }
 
 message UpdateBookRequest {
-    string BookId = 1; 
-    BookData Message = 2;   
+    string book_id = 1; 
+    BookData msg = 2;   
 }
 
 message DeleteBookRequest {
-    string BookId = 1; 
+    string book_id = 1; 
 }
 
 message PostBookRequest {
-    BookData Message = 1;   
+    BookData msg = 1;   
 }
 
 message GetBookRequest {
-    string Buff = 1;   
+    string buff = 1;   
 }

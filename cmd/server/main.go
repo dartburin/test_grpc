@@ -11,11 +11,11 @@ import (
 
 func main() {
 	// Load init parameters
-	dbHostName := flag.String("dbhost", "", "host name")
-	dbUser := flag.String("dbuser", "", "user db name")
+	dbHostName := flag.String("dbhost", "localhost", "host name")
+	dbUser := flag.String("dbuser", "postgres", "user db name")
 	dbPass := flag.String("dbpass", "", "user db pass")
 	dbBase := flag.String("dbbase", "", "database name")
-	dbPort := flag.String("dbport", "", "port for database connect")
+	dbPort := flag.String("dbport", "5432", "port for database connect")
 
 	logLevel := flag.String("loglvl", "", "logging message level")
 	logFile := flag.String("logfile", "", "logging message to file")

@@ -13,7 +13,7 @@ import (
 )
 
 // Data for HTTP REST gateway
-type proxyREST struct {
+type gatewayREST struct {
 	log   lg.FieldLogger
 	Host  string
 	Port  string
@@ -23,10 +23,10 @@ type proxyREST struct {
 }
 
 // New creates new HTTP gateway struct
-func New(ghost string, gport string, port string, log lg.FieldLogger) *proxyREST {
+func New(ghost string, gport string, port string, log lg.FieldLogger) *gatewayREST {
 	str := fmt.Sprintf(":%s", port)
 	gstr := fmt.Sprintf("%s:%s", ghost, gport)
-	return &proxyREST{
+	return &gatewayREST{
 		log:   log,
 		Host:  ghost,
 		Port:  port,
@@ -37,7 +37,7 @@ func New(ghost string, gport string, port string, log lg.FieldLogger) *proxyREST
 }
 
 // Start REST HTTP gateway
-func (s *proxyREST) Start() error {
+func (s *gatewayREST) Start() error {
 	s.log.Println("HTTP gateway init.")
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)

@@ -34,11 +34,13 @@ type Book struct {
 
 // Create connection to db
 func ConnectToDB(conf Config, log lg.FieldLogger) (ParamDB, error) {
-	var err error = nil
+	var err error
 	var par ParamDB
 	par.Conf = conf
 	par.Base = nil
 	par.log = log
+
+	par.log.Println("Start connection to database.")
 
 	if conf.User == "" || conf.Pass == "" || conf.Db == "" ||
 		conf.Host == "" || conf.Port == "" {
@@ -46,43 +48,15 @@ func ConnectToDB(conf Config, log lg.FieldLogger) (ParamDB, error) {
 		return par, err
 	}
 
-	// Check connect to default server PostgreSQL database
-	connstr := fmt.Sprintf("user=%s password=%s host=%s port=%s sslmode=disable",
-		conf.User, conf.Pass, conf.Host, conf.Port)
-	defdb, err := openDB(connstr)
+	// Connect to user database
+	connstr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
+		conf.User, conf.Pass, conf.Host, conf.Port, conf.Db)
+	db, err := openDB(connstr)
 	if err != nil {
-		err = errors.New("Bad connection to server db")
+		err = errors.New("Bad connection to user db")
 		return par, err
 	}
-	defer defdb.Close()
-
-	// Check user database exists and create if need
-	if err = checkExistsUserDB(defdb, conf.Db); err != nil {
-		par, err = createDB(conf, defdb)
-
-		if err != nil {
-			defer par.Base.Close()
-			par.Base = nil
-			return par, err
-		}
-
-		err = createBookTable(par.Base)
-		if err != nil {
-			defer par.Base.Close()
-			par.Base = nil
-			return par, err
-		}
-	} else {
-		// Connect to user database
-		connstr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-			conf.User, conf.Pass, conf.Host, conf.Port, conf.Db)
-		db, err := openDB(connstr)
-		if err != nil {
-			err = errors.New("Bad connection to user db")
-			return par, err
-		}
-		par.Base = db
-	}
+	par.Base = db
 
 	par.log.Println("Set connection to database.")
 	return par, nil
@@ -100,65 +74,6 @@ func (par *ParamDB) Close() (err error) {
 	}
 
 	par.Base = nil
-	return nil
-}
-
-// Check user database exists and create if need
-func checkExistsUserDB(base *sql.DB, name string) error {
-	queue := fmt.Sprintf("SELECT COUNT(*) FROM pg_database WHERE datname = '%s';", name)
-
-	row := base.QueryRow(queue)
-
-	var cnt int
-	if err := row.Scan(&cnt); err != nil {
-		panic(err)
-	}
-
-	if cnt != 1 {
-		return errors.New("No base")
-	}
-	return nil
-}
-
-// Create user database
-func createDB(conf Config, base *sql.DB) (ParamDB, error) {
-	var par ParamDB
-	par.Conf = conf
-	par.Base = nil
-
-	queue := fmt.Sprintf("CREATE DATABASE %s;", conf.Db)
-
-	_, err := base.Exec(queue)
-	if err != nil {
-		panic(err)
-	}
-
-	// Check connect to user DB
-	connstr := fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s sslmode=disable",
-		conf.User, conf.Pass, conf.Host, conf.Port, conf.Db)
-
-	db, err := openDB(connstr)
-	if err != nil {
-		err = errors.New("Bad connection to user db")
-		return par, err
-	}
-
-	par.Base = db
-	return par, nil
-}
-
-// Create BookInfo table
-func createBookTable(base *sql.DB) error {
-	_, err := base.Exec("CREATE TABLE IF NOT EXISTS BookInfo(" +
-		"id SERIAL PRIMARY KEY," +
-		"title varchar(50)," +
-		"author varchar(50)" +
-		");")
-
-	if err != nil {
-		panic(err)
-	}
-
 	return nil
 }
 

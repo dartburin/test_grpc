@@ -72,7 +72,7 @@ func request_Library_UpdateBook_0(ctx context.Context, marshaler runtime.Marshal
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -83,15 +83,15 @@ func request_Library_UpdateBook_0(ctx context.Context, marshaler runtime.Marshal
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := client.UpdateBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -107,7 +107,7 @@ func local_request_Library_UpdateBook_0(ctx context.Context, marshaler runtime.M
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -118,15 +118,15 @@ func local_request_Library_UpdateBook_0(ctx context.Context, marshaler runtime.M
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := server.UpdateBook(ctx, &protoReq)
@@ -134,7 +134,7 @@ func local_request_Library_UpdateBook_0(ctx context.Context, marshaler runtime.M
 
 }
 
-func request_Library_PathBook_0(ctx context.Context, marshaler runtime.Marshaler, client LibraryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_Library_PatchBook_0(ctx context.Context, marshaler runtime.Marshaler, client LibraryClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookRequest
 	var metadata runtime.ServerMetadata
 
@@ -142,7 +142,7 @@ func request_Library_PathBook_0(ctx context.Context, marshaler runtime.Marshaler
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -153,23 +153,23 @@ func request_Library_PathBook_0(ctx context.Context, marshaler runtime.Marshaler
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
-	msg, err := client.PathBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.PatchBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
 
-func local_request_Library_PathBook_0(ctx context.Context, marshaler runtime.Marshaler, server LibraryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_Library_PatchBook_0(ctx context.Context, marshaler runtime.Marshaler, server LibraryServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq UpdateBookRequest
 	var metadata runtime.ServerMetadata
 
@@ -177,7 +177,7 @@ func local_request_Library_PathBook_0(ctx context.Context, marshaler runtime.Mar
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -188,18 +188,18 @@ func local_request_Library_PathBook_0(ctx context.Context, marshaler runtime.Mar
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
-	msg, err := server.PathBook(ctx, &protoReq)
+	msg, err := server.PatchBook(ctx, &protoReq)
 	return msg, metadata, err
 
 }
@@ -215,15 +215,15 @@ func request_Library_DeleteBook_0(ctx context.Context, marshaler runtime.Marshal
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := client.DeleteBook(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -242,15 +242,15 @@ func local_request_Library_DeleteBook_0(ctx context.Context, marshaler runtime.M
 		_   = err
 	)
 
-	val, ok = pathParams["BookId"]
+	val, ok = pathParams["book_id"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "BookId")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "book_id")
 	}
 
 	protoReq.BookId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "BookId", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "book_id", err)
 	}
 
 	msg, err := server.DeleteBook(ctx, &protoReq)
@@ -266,7 +266,7 @@ func request_Library_PostBook_0(ctx context.Context, marshaler runtime.Marshaler
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -283,7 +283,7 @@ func local_request_Library_PostBook_0(ctx context.Context, marshaler runtime.Mar
 	if berr != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", berr)
 	}
-	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Message); err != nil && err != io.EOF {
+	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq.Msg); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
@@ -337,7 +337,7 @@ func RegisterLibraryHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 
 	})
 
-	mux.Handle("PATCH", pattern_Library_PathBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PATCH", pattern_Library_PatchBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -346,14 +346,14 @@ func RegisterLibraryHandlerServer(ctx context.Context, mux *runtime.ServeMux, se
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_Library_PathBook_0(rctx, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_Library_PatchBook_0(rctx, inboundMarshaler, server, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Library_PathBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Library_PatchBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -478,7 +478,7 @@ func RegisterLibraryHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 
 	})
 
-	mux.Handle("PATCH", pattern_Library_PathBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PATCH", pattern_Library_PatchBook_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
@@ -487,14 +487,14 @@ func RegisterLibraryHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_Library_PathBook_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Library_PatchBook_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Library_PathBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Library_PatchBook_0(ctx, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -544,11 +544,11 @@ func RegisterLibraryHandlerClient(ctx context.Context, mux *runtime.ServeMux, cl
 var (
 	pattern_Library_GetBooks_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Library_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "BookId"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Library_UpdateBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Library_PathBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "BookId"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Library_PatchBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, "", runtime.AssumeColonVerbOpt(true)))
 
-	pattern_Library_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "BookId"}, "", runtime.AssumeColonVerbOpt(true)))
+	pattern_Library_DeleteBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 1, 0, 4, 1, 5, 1}, []string{"books", "book_id"}, "", runtime.AssumeColonVerbOpt(true)))
 
 	pattern_Library_PostBook_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0}, []string{"books"}, "", runtime.AssumeColonVerbOpt(true)))
 )
@@ -558,7 +558,7 @@ var (
 
 	forward_Library_UpdateBook_0 = runtime.ForwardResponseMessage
 
-	forward_Library_PathBook_0 = runtime.ForwardResponseMessage
+	forward_Library_PatchBook_0 = runtime.ForwardResponseMessage
 
 	forward_Library_DeleteBook_0 = runtime.ForwardResponseMessage
 

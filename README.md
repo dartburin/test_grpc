@@ -19,13 +19,13 @@ Sample of testing orders
 http://127.0.0.1:8080/books
 
 (POST)
-curl -XPOST "http://127.0.0.1:8080/books" -d '{"Author": "Some author", "Title": "New book 1"}'
+curl -XPOST "http://127.0.0.1:8080/books" -d '{"author": "Some author", "title": "New book 1"}'
 
 (DELETE)
 curl -XDELETE "http://127.0.0.1:8080/books/91"
 
-(PATCH)
-curl -XPATCH "http://127.0.0.1:8080/books/43" -d '{"Author": "A100", "Title": "Book 1"}'
+(PATCH) partly update
+curl -XPATCH "http://127.0.0.1:8080/books/43" -d '{"author": "A100", "title": "Book 1"}'
 
-(PUT)
-curl -XPUT "http://127.0.0.1:8080/books/43" -d '{"Author": "A1", "Title": "Book 1"}'
+(PUT) full update
+curl -XPUT "http://127.0.0.1:8080/books/43" -d '{"author": "A1", "title": "Book 1"}'
