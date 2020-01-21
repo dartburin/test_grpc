@@ -6,18 +6,18 @@ grant all privileges on database books to postgres;
 \c books
 
 -- Create table in user database
-create table if not exists BookInfo(
+create table if not exists book_records(
 	id serial primary key not null,
 	title varchar(50),
 	author varchar(50)
 );
 
 -- Insert test data in user table
-insert into BookInfo (author, title)
+insert into book_records (author, title)
 values('Best Author 1', 'Boook 1');
 
-insert into BookInfo (author, title)
+insert into book_records (author, title)
 values('Best Author 2', 'Boook 1111');
 
-insert into BookInfo (author, title)
+insert into book_records (author, title)
 values('Best Author 3', 'Boook 111');

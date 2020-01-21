@@ -47,7 +47,7 @@ func (s *supportGRPC) Start() error {
 	return nil
 }
 
-func toTransport(b *pdb.Book) *bk.OneBook {
+func toTransport(b *pdb.BookRecord) *bk.OneBook {
 	return &bk.OneBook{
 		Id:     b.Id,
 		Author: b.Author,
@@ -55,8 +55,8 @@ func toTransport(b *pdb.Book) *bk.OneBook {
 	}
 }
 
-func toDB(id int64, bb *bk.BookData) *pdb.Book {
-	return &pdb.Book{
+func toDB(id int64, bb *bk.BookData) *pdb.BookRecord {
+	return &pdb.BookRecord{
 		Id:     id,
 		Author: bb.Author,
 		Title:  bb.Title,
@@ -64,7 +64,7 @@ func toDB(id int64, bb *bk.BookData) *pdb.Book {
 }
 
 func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*bk.Books, error) {
-	var bb pdb.Book
+	var bb pdb.BookRecord
 	books, err := bb.SelectBook(s.db)
 	if err != nil {
 		return nil, errors.New("Error get book")
@@ -108,7 +108,7 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 	if err != nil {
 		return nil, errors.New("Error delete book (bad id)")
 	}
-	b := &pdb.Book{}
+	b := &pdb.BookRecord{}
 	b.Id = int64(id)
 
 	err = b.DeleteBook(s.db)
