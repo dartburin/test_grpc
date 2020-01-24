@@ -38,6 +38,8 @@ COPY ./internal/ ./
 COPY ./internal/api ./internal/
 COPY ./internal/api/server ./internal/api/
 COPY ./internal/api/server/* ./internal/api/server/
+COPY ./internal/api/middleware ./internal/api/
+COPY ./internal/api/middleware/* ./internal/api/middleware/
 COPY ./internal/books ./internal/
 COPY ./internal/books/* ./internal/books/
 COPY ./internal/logger ./internal/

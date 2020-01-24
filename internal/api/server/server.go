@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	bk "test_grpc/api/proto"
+	mid "test_grpc/internal/api/middleware"
 	pdb "test_grpc/internal/books"
 
 	"google.golang.org/grpc"
@@ -36,7 +37,13 @@ func (s *supportGRPC) Start() error {
 	if err != nil {
 		return err
 	}
-	srv := grpc.NewServer()
+
+	ll := &mid.LogData{
+		Log: s.db.Log,
+		Name: "Server gRPC",
+	}
+
+	srv := grpc.NewServer(ll.WithServerUnaryInterceptors())
 	bk.RegisterLibraryServer(srv, s)
 
 	s.db.Log.Println("Server gRPC start.")
@@ -63,11 +70,11 @@ func toDB(id int64, bb *bk.BookData) *pdb.BookRecord {
 	}
 }
 
-func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*bk.Books, error) {
+func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBooksRequest) (*bk.Books, error) {
 	var bb pdb.BookRecord
-	books, err := bb.SelectBook(s.db)
+	books, err := bb.SelectBooks(s.db)
 	if err != nil {
-		return nil, errors.New("Error get book")
+		return nil, errors.New("Error get books")
 	}
 
 	bs := bk.Books{}
@@ -78,6 +85,23 @@ func (s *supportGRPC) GetBooks(ctx context.Context, imsg *bk.GetBookRequest) (*b
 	}
 
 	return &bs, nil
+}
+
+func (s *supportGRPC) GetBook(ctx context.Context, imsg *bk.GetBookRequest) (*bk.OneBook, error) {
+	id, err := strconv.Atoi(imsg.BookId)
+	if err != nil {
+		return nil, errors.New("Error get book (bad id)")
+	}
+	b := &pdb.BookRecord{}
+	b.Id = int64(id)
+
+	bk, err := b.SelectBook(s.db)
+	if err != nil {
+		return nil, errors.New("Error get book")
+	}
+
+	bb := toTransport(bk)
+	return bb, nil
 }
 
 // Handler for post request
@@ -97,8 +121,6 @@ func (s *supportGRPC) PostBook(ctx context.Context, imsg *bk.PostBookRequest) (*
 	}
 
 	bb := toTransport(b)
-	s.db.Log.Printf("gRPC post a book ret %v.", *bb)
-
 	return bb, nil
 }
 
@@ -118,8 +140,6 @@ func (s *supportGRPC) DeleteBook(ctx context.Context, imsg *bk.DeleteBookRequest
 
 	bb := bk.Result{}
 	bb.Rez = fmt.Sprintf("Delete book with id = %v", b.Id)
-
-	s.db.Log.Printf("gRPC delete a book %v.", bb)
 	return &bb, nil
 }
 
@@ -141,7 +161,6 @@ func (s *supportGRPC) UpdateBook(ctx context.Context, imsg *bk.UpdateBookRequest
 	}
 
 	bb := toTransport(b)
-	s.db.Log.Printf("gRPC updata a book %v.", *bb)
 	return bb, nil
 }
 
@@ -159,6 +178,5 @@ func (s *supportGRPC) PatchBook(ctx context.Context, imsg *bk.UpdateBookRequest)
 	}
 
 	bb := toTransport(b)
-	s.db.Log.Printf("gRPC path a book %v.", *bb)
 	return bb, nil
 }

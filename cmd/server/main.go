@@ -28,8 +28,7 @@ func main() {
 	lg.PrintOsArgs(log)
 
 	// Check existing obligatory http and db parameters
-	if *grpcPort == "" || *dbHostName == "" || *dbUser == "" || *dbPass == "" ||
-		*dbBase == "" || *dbPort == "" {
+	if *grpcPort == "" || *dbPass == "" || *dbBase == "" {
 		flag.PrintDefaults()
 		fmt.Println("")
 		log.Fatalln("Init server error: set not all obligatory parameters.")

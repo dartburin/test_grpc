@@ -164,22 +164,36 @@ func (b *BookRecord) UpdateBook(par *ParamDB) error {
 	return nil
 }
 
-// Select book info from database
-func (b *BookRecord) SelectBook(par *ParamDB) (*[]BookRecord, error) {
+// Select books info from database
+func (b *BookRecord) SelectBooks(par *ParamDB) (*[]BookRecord, error) {
 	bb := make([]BookRecord, 0)
-	tx, err := par.StartTX("Select Book")
+	tx, err := par.StartTX("Select Books")
 	if err != nil {
 		return &bb, err
 	}
 	txEnd := false
-	defer par.StopTX(tx, &txEnd, "Select Book")
+	defer par.StopTX(tx, &txEnd, "Select Books")
 
-	if b.Id > 0 {
-		tx.Where("id = ?", b.Id).Find(&bb)
-	} else {
-		tx.Order("id").Find(&bb)
-	}
-
+	tx.Order("id").Find(&bb)
 	txEnd = true
 	return &bb, nil
+}
+
+// Select book info from database
+func (b *BookRecord) SelectBook(par *ParamDB) (*BookRecord, error) {
+	bb := &BookRecord{}
+	tx, err := par.StartTX("Select Book")
+	if err != nil {
+		return nil, err
+	}
+	txEnd := false
+	defer par.StopTX(tx, &txEnd, "Select Book")
+
+	if b.Id <= 0 {
+		return nil, errors.New("Id not set")
+	}
+
+	tx.Where("id = ?", b.Id).Find(&bb)
+	txEnd = true
+	return bb, nil
 }

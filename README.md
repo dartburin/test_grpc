@@ -12,6 +12,12 @@ Begin
 (test terminal) ./test/test.sh
 (browser)  http://localhost:8080/books
 
+
+View console output
+
+(log terminal) docker logs -f gRPCserver
+
+
 End
 
 (docker terminal) Ctrl+z
@@ -24,6 +30,7 @@ Sample of testing orders
 
 (GET)
 http://127.0.0.1:8080/books
+curl -XGET "http://127.0.0.1:8080/books/3"
 
 (POST)
 curl -XPOST "http://127.0.0.1:8080/books" -d '{"author": "Some author", "title": "New book 1"}'

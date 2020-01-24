@@ -5,9 +5,15 @@ import "test_grpc/third_party/api/annotations.proto";
 
 // The library service definition.
 service Library {
-    rpc GetBooks(GetBookRequest) returns (Books) {
+    rpc GetBooks(GetBooksRequest) returns (Books) {
         option (google.api.http) = {
           get: "/books"
+        };
+    }
+
+    rpc GetBook(GetBookRequest) returns (OneBook) {
+        option (google.api.http) = {
+          get: "/books/{book_id}"
         };
     }
 
@@ -73,5 +79,9 @@ message PostBookRequest {
 }
 
 message GetBookRequest {
+    string book_id = 1; 
+}
+
+message GetBooksRequest {
     string buff = 1;   
 }
