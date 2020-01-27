@@ -11,9 +11,9 @@ import (
 func main() {
 	//fmt.Printf("Proxy init \n")
 	// Load init parameters
-	httpPort := flag.String("httpport", "", "port for http connect")
+	httpPort := flag.String("httpport", "8080", "port for http connect")
 	grpcHostName := flag.String("grpchost", "", "grpc host name")
-	grpcPort := flag.String("grpcport", "", "port for grpc connect")
+	grpcPort := flag.String("grpcport", "8086", "port for grpc connect")
 
 	logLevel := flag.String("loglvl", "", "logging message level")
 	logFile := flag.String("logfile", "", "logging message to file")
@@ -25,7 +25,7 @@ func main() {
 	lg.PrintOsArgs(log)
 
 	// Check existing obligatory http and db parameters
-	if *grpcHostName == "" || *httpPort == "" || *grpcPort == "" {
+	if *grpcHostName == "" {
 		flag.PrintDefaults()
 		fmt.Println("")
 		log.Fatalln("Init server error: set not all obligatory parameters.")
